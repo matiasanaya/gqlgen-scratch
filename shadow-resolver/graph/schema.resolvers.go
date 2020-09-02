@@ -11,19 +11,19 @@ import (
 	"github.com/matiasanaya/gqlgen-scratch/shadow-resolver/graph/model"
 )
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
+func (r *queryResolver) Todo(ctx context.Context) (*model.Todo, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
+func (r *todoResolver) Working(ctx context.Context, obj *model.Todo, in *int) (*int, error) {
 	panic(fmt.Errorf("not implemented"))
 }
-
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
+// Todo returns generated.TodoResolver implementation.
+func (r *Resolver) Todo() generated.TodoResolver { return &todoResolver{r} }
+
 type queryResolver struct{ *Resolver }
+type todoResolver struct{ *Resolver }
