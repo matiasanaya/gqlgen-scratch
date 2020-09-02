@@ -47,6 +47,7 @@ type ComplexityRoot struct {
 	}
 
 	Todo struct {
+		Broken  func(childComplexity int) int
 		Working func(childComplexity int, in *int) int
 	}
 }
@@ -56,6 +57,7 @@ type QueryResolver interface {
 }
 type TodoResolver interface {
 	Working(ctx context.Context, obj *model.Todo, in *int) (*int, error)
+	Broken(ctx context.Context, obj *model.Todo) (*int, error)
 }
 
 type executableSchema struct {
@@ -79,6 +81,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Todo(childComplexity), true
+
+	case "Todo.broken":
+		if e.complexity.Todo.Broken == nil {
+			break
+		}
+
+		return e.complexity.Todo.Broken(childComplexity), true
 
 	case "Todo.working":
 		if e.complexity.Todo.Working == nil {
@@ -148,6 +157,7 @@ var sources = []*ast.Source{
 
 type Todo {
   working(in: Int): Int
+  broken(in: Int): Int
 }
 
 type Query {
@@ -354,6 +364,37 @@ func (ec *executionContext) _Todo_working(ctx context.Context, field graphql.Col
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Todo().Working(rctx, obj, args["in"].(*int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Todo_broken(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Todo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Todo().Broken(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1491,6 +1532,17 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._Todo_working(ctx, field, obj)
+				return res
+			})
+		case "broken":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Todo_broken(ctx, field, obj)
 				return res
 			})
 		default:

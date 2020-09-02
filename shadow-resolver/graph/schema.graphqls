@@ -4,6 +4,7 @@
 
 type Todo {
   working(in: Int): Int
+  broken(in: Int): Int
 }
 
 type Query {

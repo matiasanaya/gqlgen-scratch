@@ -19,6 +19,10 @@ func (r *todoResolver) Working(ctx context.Context, obj *model.Todo, in *int) (*
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *todoResolver) Broken(ctx context.Context, obj *model.Todo) (*int, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
